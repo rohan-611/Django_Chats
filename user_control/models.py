@@ -48,6 +48,29 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ordering = ("created_at",)
 
 
+class UserProfile(models.Model):
+
+    user = models.OneToOneField(
+        CustomUser, related_name="user_profile", on_delete=models.CASCADE
+    )
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    caption = models.CharField(max_length=250, blank=True, null=True)
+    about = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(
+        upload_to="user/profile_picture", blank=True, null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "User Profile"
+        verbose_name_plural = "User Profiles"
+
+    def __str__(self):
+        return self.user.username
+
+
 class JWT(models.Model):
     user = models.OneToOneField(
         CustomUser, related_name="login_user", on_delete=models.CASCADE
@@ -55,4 +78,4 @@ class JWT(models.Model):
     access = models.TextField()
     refresh = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=False)
+    updated_at = models.DateTimeField(auto_now=True)

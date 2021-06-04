@@ -55,9 +55,13 @@ class LoginView(APIView):
         access = get_access_token({"user_id": user.id})
         refresh = get_refresh_token()
 
-        JWT.objects.create(
-            user_id=user.id, access=access.decode(), refresh=refresh.decode()
+        new_jwt = JWT.objects.create(
+            user_id=user.id,
+            access=jwt.decode(access, settings.SECRET_KEY, algorithms="HS256"),
+            refresh=jwt.decode(refresh, settings.SECRET_KEY, algorithms="HS256"),
         )
+
+        new_jwt.save()
 
         return Response({"access": access, "refresh": refresh})
 
@@ -81,10 +85,14 @@ class RefreshView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        refresh = serializer.validated_data["refresh"]
+        refresh = jwt.decode(refresh, settings.SECRET_KEY, algorithms="HS256")
+
         try:
-            active_jwt = JWT.objects.get(refresh=serializer.validated_data["refresh"])
+            active_jwt = JWT.objects.get(refresh=refresh)
         except JWT.DoesNotExist:
             return Response({"error": "refresh token not found"}, status="400")
+
         if not Authentication.verify_token(serializer.validated_data["refresh"]):
             return Response({"error": "Token is invalid or has expired"})
 

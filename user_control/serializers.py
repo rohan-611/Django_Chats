@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .models import UserProfile, CustomUser
 
 
 class LoginSerializer(serializers.Serializer):
@@ -13,3 +14,17 @@ class RegisterSerializer(serializers.Serializer):
 
 class RefreshSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+
+class CustomUserSeriealizer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = "__all__"
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = CustomUserSeriealizer(read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
