@@ -86,6 +86,8 @@ class TestUserInfo(APITestCase):
 
     def test_post_user_profile(self):
 
+        # Implement this same test with profile picture too
+
         payload = {
             "user_id": self.user.id,
             "first_name": "Rohan",
@@ -101,3 +103,32 @@ class TestUserInfo(APITestCase):
         self.assertEqual(result["first_name"], "Rohan")
         self.assertEqual(result["last_name"], "Raghuwanshi")
         self.assertEqual(result["user"]["username"], "rohan")
+
+    def test_update_user_profile(self):
+
+        # Implement this same test with profile picture too
+
+        payload = {
+            "user_id": self.user.id,
+            "first_name": "Rohan",
+            "last_name": "Raghuwanshi",
+            "caption": "Being alive is different from living",
+            "about": "I am a Developer whose also a designer",
+        }
+
+        response = self.client.post(self.profile_url, data=payload)
+        result = response.json()
+
+        # Profile Created
+        # Now let's update it
+
+        payload = {"first_name": "Ron", "last_name": "Ron"}
+
+        response = self.client.patch(
+            self.profile_url + f"/{result['id']}", data=payload
+        )
+        result = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result["first_name"], "Ron")
+        self.assertEqual(result["last_name"], "Ron")
