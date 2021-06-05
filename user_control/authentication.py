@@ -35,7 +35,7 @@ class Authentication(BaseAuthentication):
     @staticmethod
     def verify_token(token):
         try:
-            decoded_data = jwt.decode(token, settings.SECRET_KEY, algorithm="HS256")
+            decoded_data = jwt.decode(token, settings.SECRET_KEY, algorithms="HS256")
         except Exception:
             return None
 

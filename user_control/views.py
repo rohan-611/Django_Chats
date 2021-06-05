@@ -8,11 +8,18 @@ from django.contrib.auth import authenticate
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 
 from .models import JWT, CustomUser
 from .authentication import Authentication
-from .serializers import LoginSerializer, RegisterSerializer, RefreshSerializer
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    RefreshSerializer,
+    UserProfileSerializer,
+    UserProfile,
+)
 
 
 def get_random(length):
@@ -99,8 +106,16 @@ class RefreshView(APIView):
         access = get_access_token({"user_id": active_jwt.user.id})
         refresh = get_refresh_token()
 
-        active_jwt.access = access.decode()
-        active_jwt.refresh = refresh.decode()
+        active_jwt.access = jwt.decode(access, settings.SECRET_KEY, algorithms="HS256")
+        active_jwt.refresh = jwt.decode(
+            refresh, settings.SECRET_KEY, algorithms="HS256"
+        )
         active_jwt.save()
 
         return Response({"access": access, "refresh": refresh})
+
+
+class UserProfileView(ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated,)

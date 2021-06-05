@@ -24,6 +24,7 @@ class CustomUserSeriealizer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = CustomUserSeriealizer(read_only=True)
+    user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = UserProfile

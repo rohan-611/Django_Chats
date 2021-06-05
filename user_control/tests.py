@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 
+from .models import CustomUser
 from .views import get_random, get_refresh_token, get_access_token
 
 # Create your tests here.
@@ -42,19 +43,19 @@ class TestAuth(APITestCase):
     def test_register(self):
         payload = {"username": "rohan", "password": "hello@123"}
 
-        resp = self.client.post(self.register_url, data=payload)
+        response = self.client.post(self.register_url, data=payload)
 
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_login(self):
         payload = {"username": "rohan", "password": "hello@123"}
 
         self.client.post(self.register_url, data=payload)
 
-        resp = self.client.post(self.login_url, data=payload)
-        result = resp.json()
+        response = self.client.post(self.login_url, data=payload)
+        result = response.json()
 
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         self.assertTrue(result["access"])
         self.assertTrue(result["refresh"])
@@ -64,13 +65,39 @@ class TestAuth(APITestCase):
 
         self.client.post(self.register_url, data=payload)
 
-        resp = self.client.post(self.login_url, data=payload)
-        refresh = resp.json()["refresh"]
+        response = self.client.post(self.login_url, data=payload)
+        refresh = response.json()["refresh"]
 
-        resp = self.client.post(self.refresh_url, data={"refresh": refresh})
-        result = resp.json()
+        response = self.client.post(self.refresh_url, data={"refresh": refresh})
+        result = response.json()
 
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         self.assertTrue(result["access"])
         self.assertTrue(result["refresh"])
+
+
+class TestUserInfo(APITestCase):
+    profile_url = "/user/profile"
+
+    def setUp(self):
+        self.user = CustomUser.objects.create(username="rohan", password="rohan@123")
+        self.client.force_authenticate(user=self.user)
+
+    def test_post_user_profile(self):
+
+        payload = {
+            "user_id": self.user.id,
+            "first_name": "Rohan",
+            "last_name": "Raghuwanshi",
+            "caption": "Being alive is different from living",
+            "about": "I am a Developer whose also a designer",
+        }
+
+        response = self.client.post(self.profile_url, data=payload)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(result["first_name"], "Rohan")
+        self.assertEqual(result["last_name"], "Raghuwanshi")
+        self.assertEqual(result["user"]["username"], "rohan")
