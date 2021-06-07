@@ -1,9 +1,23 @@
+import json
+from six import BytesIO
+from PIL import Image
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from rest_framework.test import APITestCase
 
 from .models import CustomUser
 from .views import get_random, get_refresh_token, get_access_token
 
-# Create your tests here.
+
+def create_image(
+    storage, filename, size=(100, 100), image_mode="RGB", image_format="PNG"
+):
+    img_file = BytesIO()
+    Image.new(image_mode, size).save(img_file, image_format)
+    img_file.name = filename
+    img_file.seek(0)
+    return img_file
 
 
 class TestGenericFunctions(APITestCase):
@@ -86,7 +100,7 @@ class TestUserInfo(APITestCase):
 
     def test_post_user_profile(self):
 
-        # Implement this same test with profile picture too
+        profile_picture = create_image(None, "profile_picture.png")
 
         payload = {
             "user_id": self.user.id,
@@ -94,9 +108,10 @@ class TestUserInfo(APITestCase):
             "last_name": "Raghuwanshi",
             "caption": "Being alive is different from living",
             "about": "I am a Developer whose also a designer",
+            "profile_picture": profile_picture,
         }
 
-        response = self.client.post(self.profile_url, data=payload)
+        response = self.client.post(self.profile_url, data=payload, format="multipart")
         result = response.json()
 
         self.assertEqual(response.status_code, 201)
@@ -106,7 +121,7 @@ class TestUserInfo(APITestCase):
 
     def test_update_user_profile(self):
 
-        # Implement this same test with profile picture too
+        profile_picture = create_image(None, "profile_picture.png")
 
         payload = {
             "user_id": self.user.id,
@@ -114,6 +129,7 @@ class TestUserInfo(APITestCase):
             "last_name": "Raghuwanshi",
             "caption": "Being alive is different from living",
             "about": "I am a Developer whose also a designer",
+            "profile_picture": profile_picture,
         }
 
         response = self.client.post(self.profile_url, data=payload)
@@ -122,7 +138,13 @@ class TestUserInfo(APITestCase):
         # Profile Created
         # Now let's update it
 
-        payload = {"first_name": "Ron", "last_name": "Ron"}
+        profile_picture2 = create_image(None, "profile_picture2.png")
+
+        payload = {
+            "first_name": "Ron",
+            "last_name": "Ron",
+            "profile_picture": profile_picture2,
+        }
 
         response = self.client.patch(
             self.profile_url + f"/{result['id']}", data=payload
