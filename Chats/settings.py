@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "channels",
     "user_control",
+    "message",
     "chatapp",
 ]
 
