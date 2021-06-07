@@ -1,14 +1,6 @@
 from django.db import models
 
 
-class GenericFileUpload(models.Model):
-    file = models.FileField(upload_to="message/attachments")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{ self.file }"
-
-
 class Message(models.Model):
 
     sender = models.ForeignKey("user_control.CustomUser", on_delete=models.CASCADE)
@@ -29,7 +21,7 @@ class Message(models.Model):
 class MessageAttachment(models.Model):
 
     message = models.ForeignKey(Message, on_delete=models.CASCADE)
-    attachment = models.ForeignKey(GenericFileUpload, on_delete=models.CASCADE)
+    attachment = models.FileField(upload_to="message/attachments")
     caption = models.CharField(max_length=225, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
