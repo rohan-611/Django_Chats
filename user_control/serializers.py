@@ -19,7 +19,7 @@ class RefreshSerializer(serializers.Serializer):
 class CustomUserSeriealizer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = "__all__"
+        exclude = ("password",)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
