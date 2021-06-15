@@ -1,13 +1,12 @@
 import json
-from six import BytesIO
-from PIL import Image
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-
+from PIL import Image
 from rest_framework.test import APITestCase
+from six import BytesIO
 
-from .models import CustomUser
-from .views import get_random, get_refresh_token, get_access_token
+from .models import CustomUser, UserProfile
+from .views import get_access_token, get_random, get_refresh_token
 
 
 def create_image(
@@ -95,7 +94,9 @@ class TestUserInfo(APITestCase):
     profile_url = "/user/profile"
 
     def setUp(self):
-        self.user = CustomUser.objects.create(username="rohan", password="rohan@123")
+        self.user = CustomUser.objects._create_user(
+            username="rohan", password="rohan@123"
+        )
         self.client.force_authenticate(user=self.user)
 
     def test_post_user_profile(self):
@@ -154,3 +155,32 @@ class TestUserInfo(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result["first_name"], "Ron")
         self.assertEqual(result["last_name"], "Ron")
+
+    def test_user_search(self):
+        url = self.profile_url + "?keyword=Rohan"
+
+        UserProfile.objects.create(
+            user=self.user,
+            first_name="Rohan",
+            last_name="Raghuwanshi",
+            caption="Being alive is different from living",
+            about="I am a Developer whose also a designer",
+        )
+
+        self.user2 = CustomUser.objects._create_user(
+            username="tester", password="tester@123"
+        )
+        UserProfile.objects.create(
+            user=self.user2,
+            first_name="Vicks",
+            last_name="dangi",
+            caption="Being alive is different from living",
+            about="I am an anime lover",
+        )
+
+        response = self.client.get(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["user"]["username"], "rohan")

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import jwt
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -125,7 +126,7 @@ class UserProfileView(ModelViewSet):
         keyword = data.get("keyword", None)
 
         if keyword:
-            search_fields = ("user__username", "first_name", "last_name", "user__email")
+            search_fields = ("user__username", "first_name", "last_name")
             query = self.get_query(keyword, search_fields)
             return self.queryset.filter(query).distinct()
 
@@ -140,7 +141,7 @@ class UserProfileView(ModelViewSet):
         for term in terms:
             or_query = None
             for field_name in search_fields:
-                q = Q(**{"%s_icontains" % field_name: term})
+                q = Q(**{"%s__icontains" % field_name: term})
                 if or_query is None:
                     or_query = q
                 else:
