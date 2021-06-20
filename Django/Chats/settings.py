@@ -8,6 +8,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+AUTH_USER_MODEL = "user_control.CustomUser"
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': "rest_framework.pagination.PageNumberPagination",
+    'PAGE_SIZE': 20
+}
 
 # Application definition
 INSTALLED_APPS = [
@@ -24,7 +30,6 @@ INSTALLED_APPS = [
     "chatapp",
 ]
 
-AUTH_USER_MODEL = "user_control.CustomUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

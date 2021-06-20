@@ -81,7 +81,8 @@ class TestAuth(APITestCase):
         response = self.client.post(self.login_url, data=payload)
         refresh = response.json()["refresh"]
 
-        response = self.client.post(self.refresh_url, data={"refresh": refresh})
+        response = self.client.post(
+            self.refresh_url, data={"refresh": refresh})
         result = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -112,7 +113,8 @@ class TestUserInfo(APITestCase):
             "profile_picture": profile_picture,
         }
 
-        response = self.client.post(self.profile_url, data=payload, format="multipart")
+        response = self.client.post(
+            self.profile_url, data=payload, format="multipart")
         result = response.json()
 
         self.assertEqual(response.status_code, 201)
@@ -179,7 +181,7 @@ class TestUserInfo(APITestCase):
         )
 
         response = self.client.get(url)
-        result = response.json()
+        result = response.json()['results']
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(result), 1)

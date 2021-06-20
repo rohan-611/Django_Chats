@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.pagination import PageNumberPagination
 
 from .authentication import Authentication
 from .models import JWT, CustomUser
@@ -66,7 +67,8 @@ class LoginView(APIView):
         new_jwt = JWT.objects.create(
             user_id=user.id,
             access=jwt.decode(access, settings.SECRET_KEY, algorithms="HS256"),
-            refresh=jwt.decode(refresh, settings.SECRET_KEY, algorithms="HS256"),
+            refresh=jwt.decode(refresh, settings.SECRET_KEY,
+                               algorithms="HS256"),
         )
 
         new_jwt.save()
@@ -107,7 +109,8 @@ class RefreshView(APIView):
         access = get_access_token({"user_id": active_jwt.user.id})
         refresh = get_refresh_token()
 
-        active_jwt.access = jwt.decode(access, settings.SECRET_KEY, algorithms="HS256")
+        active_jwt.access = jwt.decode(
+            access, settings.SECRET_KEY, algorithms="HS256")
         active_jwt.refresh = jwt.decode(
             refresh, settings.SECRET_KEY, algorithms="HS256"
         )
